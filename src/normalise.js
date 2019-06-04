@@ -20,6 +20,8 @@
 'use strict';
 
 var check = require('check-types');
+var ResourceTimingDecompression = require("resourcetiming-compression").ResourceTimingDecompression;
+ResourceTimingDecompression.HOSTNAMES_REVERSED = false;
 
 module.exports = normalise;
 
@@ -98,16 +100,16 @@ var normalisationMaps = {
     },
     restiming: {
         timestamps: [
-            { key: 'rt_st', name: 'start' },
-            { key: 'rt_fet_st', name: 'fetchStart' },
-            { key: 'rt_scon_st', name: 'sslStart', optional: true },
-            { key: 'rt_req_st', name: 'requestStart', optional: true }
+            { key: 'startTime', name: 'start' },
+            { key: 'fetchStart', name: 'fetchStart' },
+            { key: 'secureConnectionStart', name: 'sslStart', optional: true },
+            { key: 'requestStart', name: 'requestStart', optional: true }
         ],
         events: [
-            { start: 'rt_red_st', end: 'rt_red_end', name: 'redirect', optional: true },
-            { start: 'rt_dns_st', end: 'rt_dns_end', name: 'dns', optional: true },
-            { start: 'rt_con_st', end: 'rt_con_end', name: 'connect', optional: true },
-            { start: 'rt_res_st', end: 'rt_res_end', name: 'response', optional: true }
+            { start: 'redirectStart', end: 'redirectEnd', name: 'redirect', optional: true },
+            { start: 'domainLookupStart', end: 'domainLookupEnd', name: 'dns', optional: true },
+            { start: 'connectStart', end: 'connectEnd', name: 'connect', optional: true },
+            { start: 'responseStart', end: 'responseEnd', name: 'response', optional: true }
         ],
         durations: []
     }
@@ -209,13 +211,15 @@ function normaliseRestimingData (data) {
 
     if (data.restiming) {
         result = [];
+        data.restiming = JSON.parse(data.restiming);
+        const decompressedRestiming = ResourceTimingDecompression.decompressResources(data.restiming);
 
-        Object.keys(data.restiming).forEach(function (key) {
-            var datum = normaliseCategory(normalisationMaps.restiming, data.restiming[key], 'rt_st');
+        decompressedRestiming.forEach(function (resource) {
+            var datum = normaliseCategory(normalisationMaps.restiming, data.restiming[resource], 'rt_st');
 
             if (datum) {
-                datum.name = data.restiming[key].rt_name;
-                datum.type = data.restiming[key].rt_in_type;
+                datum.name = resource.name;
+                datum.type = resource.initiatorType;
             }
 
             result.push(datum);

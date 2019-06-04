@@ -35,6 +35,7 @@
     "handlebars": "~4.0.6",
     "qs": "~6.4.0",
     "request": "~2.81.0",
+    "resourcetiming-compression": "^1.2.3",
     "toobusy-js": "~0.5.1",
     "ua-parser-js": "~0.7.12",
     "useragent": "~2.1.12",
