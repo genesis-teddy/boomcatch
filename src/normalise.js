@@ -215,7 +215,7 @@ function normaliseRestimingData (data) {
         const decompressedRestiming = ResourceTimingDecompression.decompressResources(data.restiming);
 
         decompressedRestiming.forEach(function (resource) {
-            var datum = normaliseCategory(normalisationMaps.restiming, data.restiming[resource], 'rt_st');
+            var datum = normaliseCategory(normalisationMaps.restiming, resource, 'rt_st');
 
             if (datum) {
                 datum.name = resource.name;
